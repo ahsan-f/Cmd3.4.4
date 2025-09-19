@@ -28,11 +28,11 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v5
         with:
-          context: cmdbuild.
+          context: cmdbuild
           file: ./Dockerfile
           push: true
           tags: |
-            ahsand10/cmdbuild:om-2.3-3.4.1-d
+            ahsand10/cmdbuild:om-4.4.1-d
             ahsand10/cmdbuild:latest
 
       - name: Deploy with Docker Compose
