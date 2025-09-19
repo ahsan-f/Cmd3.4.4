@@ -1,8 +1,10 @@
+# Use the official Tomcat image with JDK 21
 FROM tomcat:11.0.2-jdk21-temurin-noble
 
-
+# Set the working directory inside the container
 WORKDIR $CATALINA_HOME
 
+# Set environment variables for the application configuration
 ENV CMDBUILD_URL https://sourceforge.net/projects/cmdbuild/files/3.4.2/cmdbuild-3.4.2.war/download
 ENV POSTGRES_USER postgres
 ENV POSTGRES_PASS postgres
@@ -11,48 +13,48 @@ ENV POSTGRES_HOST cmdbuild_db
 ENV POSTGRES_DB cmdbuild_db3
 ENV CMDBUILD_DUMP demo
 
+# Install necessary packages in a single, efficient RUN command
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
     maven \
-	postgresql-client \
-    zip unzip
+    postgresql-client \
+    zip unzip \
+    libssl3 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN set -x \
- 	&& mkdir $CATALINA_HOME/conf/cmdbuild/ \
- 	&& mkdir $CATALINA_HOME/webapps/cmdbuild/
+# Create application-specific directories
+RUN mkdir -p $CATALINA_HOME/conf/cmdbuild/ \
+    && mkdir -p $CATALINA_HOME/webapps/cmdbuild/
 
+# Copy configuration files and the entrypoint script from the build context
+# The 'files/' path is relative to the build context, which is the directory containing the Dockerfile.
 COPY files/tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 COPY files/context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY files/database.conf $CATALINA_HOME/conf/cmdbuild/database.conf
-COPY --chmod=755 --chown=tomcat:tomcat files/docker-entrypoint.sh /usr/local/bin/
+COPY --chown=tomcat:tomcat --chmod=755 files/docker-entrypoint.sh /usr/local/bin/
 
-# Warning for /usr/local/tomcat/native-jni-lib/libtcnative-1.so.0.2.35: libssl.so.1.1: cannot open shared object file: No such file or directory
-# using solution from here https://stackoverflow.com/a/72633324
-# RUN apt-get install libssl1.1
+# Create the 'tomcat' user and group
+RUN groupadd tomcat \
+    && useradd -s /bin/false -g tomcat -d $CATALINA_HOME tomcat
 
+# Download, unzip, and configure the CMDBuild application
 RUN set -x \
-	&& groupadd tomcat \
-	&& useradd -s /bin/false -g tomcat -d $CATALINA_HOME tomcat \
-	&& cd /tmp \
-	&& wget -O cmdbuild.war --no-check-certificate "$CMDBUILD_URL" \
-	&& chmod 777 cmdbuild.war \
-	&& chmod 777 /usr/local/bin/docker-entrypoint.sh \
-	&& unzip cmdbuild.war -d cmdbuild \
-	&& mv cmdbuild.war $CATALINA_HOME/webapps/cmdbuild.war \
-	&& mv cmdbuild/* $CATALINA_HOME/webapps/cmdbuild/ \
-	&& chmod 777 $CATALINA_HOME/webapps/cmdbuild/cmdbuild.sh \
-	&& chown tomcat -R $CATALINA_HOME \
-	&& cd /tmp \
-	&& rm -rf * \
-	&& rm -rf /var/lib/apt/lists/*
+    && wget -O /tmp/cmdbuild.war --no-check-certificate "$CMDBUILD_URL" \
+    && unzip /tmp/cmdbuild.war -d $CATALINA_HOME/webapps/cmdbuild/ \
+    && mv /tmp/cmdbuild.war $CATALINA_HOME/webapps/cmdbuild.war \
+    && chmod 755 $CATALINA_HOME/webapps/cmdbuild/cmdbuild.sh \
+    && chown -R tomcat:tomcat $CATALINA_HOME \
+    && rm -rf /tmp/*
 
-# cleanup
-RUN apt-get -qy autoremove
+# The entrypoint script will be executed when the container starts
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
-
+# Switch to the non-root 'tomcat' user for security
 USER tomcat
 
+# Expose the default Tomcat port
 EXPOSE 8080
 
+# The default command to run when the container starts
 CMD ["catalina.sh", "run"]
