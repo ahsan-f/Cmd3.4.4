@@ -24,7 +24,7 @@ RUN set -x \
 COPY files/tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 COPY files/context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY files/database.conf $CATALINA_HOME/conf/cmdbuild/database.conf
-COPY files/docker-entrypoint.sh /usr/local/bin/
+COPY --chmod=755 --chown=tomcat:tomcat files/docker-entrypoint.sh /usr/local/bin/
 
 # Warning for /usr/local/tomcat/native-jni-lib/libtcnative-1.so.0.2.35: libssl.so.1.1: cannot open shared object file: No such file or directory
 # using solution from here https://stackoverflow.com/a/72633324
