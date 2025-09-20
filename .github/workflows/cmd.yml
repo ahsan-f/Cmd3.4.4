@@ -32,7 +32,7 @@ jobs:
           file: cmdbuild/Dockerfile
           push: true
           tags: |
-            ahsand10/cmdbuild:om-4.4.1-d
+            ahsand10/cmdbuild:om-3.4.4.1-d
             ahsand10/cmdbuild:latest
 
       - name: Deploy with Docker Compose
