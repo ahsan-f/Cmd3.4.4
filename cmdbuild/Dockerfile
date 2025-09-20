@@ -32,7 +32,8 @@ RUN mkdir -p $CATALINA_HOME/conf/cmdbuild/ \
 COPY files/tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 COPY files/context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY files/database.conf $CATALINA_HOME/conf/cmdbuild/database.conf
-COPY --chown=tomcat:tomcat --chmod=755 files/docker-entrypoint.sh /usr/local/bin/
+# COPY --chown=tomcat:tomcat --chmod=755 files/docker-entrypoint.sh /usr/local/bin/
+COPY --chmod=755 --chown=tomcat:tomcat files/docker-entrypoint.sh /usr/local/bin/
 
 # Create the 'tomcat' user and group
 RUN groupadd tomcat \
