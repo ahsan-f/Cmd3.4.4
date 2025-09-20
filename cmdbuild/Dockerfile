@@ -28,12 +28,12 @@ RUN mkdir -p $CATALINA_HOME/conf/cmdbuild/ \
     && mkdir -p $CATALINA_HOME/webapps/cmdbuild/
 
 # Copy configuration files and the entrypoint script from the build context
-# The 'files/' path is relative to the build context, which is the directory containing the Dockerfile.
-COPY files/tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
-COPY files/context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
-COPY files/database.conf $CATALINA_HOME/conf/cmdbuild/database.conf
+# The 'cmdbuild/files/' path is relative to the build context, which is the directory containing the Dockerfile.
+COPY cmdbuild/files/tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
+COPY cmdbuild/files/context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
+COPY cmdbuild/files/database.conf $CATALINA_HOME/conf/cmdbuild/database.conf
 # COPY --chown=tomcat:tomcat --chmod=755 files/docker-entrypoint.sh /usr/local/bin/
-COPY --chmod=755 --chown=tomcat:tomcat files/docker-entrypoint.sh /usr/local/bin/
+COPY --chmod=755 --chown=tomcat:tomcat cmdbuild/files/docker-entrypoint.sh /usr/local/bin/
 
 # Create the 'tomcat' user and group
 RUN groupadd tomcat \
