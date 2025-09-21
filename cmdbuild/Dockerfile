@@ -5,7 +5,7 @@ FROM tomcat:11.0.2-jdk21-temurin-noble
 WORKDIR $CATALINA_HOME
 
 # Set environment variables for the application configuration
-ENV CMDBUILD_URL https://sourceforge.net/projects/cmdbuild/files/3.4.2/cmdbuild-3.4.2.war/download
+ENV CMDBUILD_URL https://sourceforge.net/projects/cmdbuild/files/latest/download
 ENV POSTGRES_USER postgres
 ENV POSTGRES_PASS postgres
 ENV POSTGRES_PORT 5432
